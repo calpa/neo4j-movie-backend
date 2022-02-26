@@ -21,29 +21,30 @@ router.get('/', async (req, res, next) => {
   let filterParams = '';
   let filterParams2 = '';
   let params = {};
-  if (req.query.title) {
-    filterParams += 'title: $title';
-    params.title = req.query.title;
-  }
-
-  // For Have a date range slider that will update the list based on movies released between the 2 years selected
-  if (req.query.first_year && req.query.last_year) {
-    filterParams2 = `(movie.released > ${req.query.first_year} and movie.released < ${req.query.last_year})`;
-  }
-
-  // Allow the table to be filtered based on the type of relationship
-  // MATCH (m:Movie)-[relatedTo]-(p:Person) where Type(relatedTo) = "PRODUCED" RETURN m
-  if (req.query.relationships) {
-    if (filterParams2) {
-      filterParams2 += ' and ';
+  if (req.query) {
+    if (req.query.title) {
+      filterParams += 'title: $title';
+      params.title = req.query.title;
     }
-    filterParams2 += `(Type(relatedTo) = $relationships)`;
-  }
 
-  if (filterParams2 !== '') {
-    filterParams2 = 'where ' + filterParams2;
-  }
+    // For Have a date range slider that will update the list based on movies released between the 2 years selected
+    if (req.query.first_year && req.query.last_year) {
+      filterParams2 = `(movie.released > ${req.query.first_year} and movie.released < ${req.query.last_year})`;
+    }
 
+    // Allow the table to be filtered based on the type of relationship
+    // MATCH (m:Movie)-[relatedTo]-(p:Person) where Type(relatedTo) = "PRODUCED" RETURN m
+    if (req.query.relationships) {
+      if (filterParams2) {
+        filterParams2 += ' and ';
+      }
+      filterParams2 += `(Type(relatedTo) = $relationships)`;
+    }
+
+    if (filterParams2 !== '') {
+      filterParams2 = 'where ' + filterParams2;
+    }
+  }
   // Default: Have a movie selector dropdown populated with all movies in the Neo4j instance listed
   let query = `MATCH (movie:Movie {${filterParams}}) ${filterParams2} return movie`;
   console.log(query);
